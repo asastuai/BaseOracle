@@ -1,0 +1,116 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import { paymentMiddleware, x402ResourceServer } from "@x402/express";
+import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { config } from "./config.js";
+import apiRoutes from "./routes/api.js";
+import { LocalFacilitator } from "./local-facilitator.js";
+
+const app = express();
+
+// ============================================
+// MIDDLEWARE
+// ============================================
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const ms = Date.now() - start;
+    console.log(`${req.method} ${req.path} → ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
+
+// ============================================
+// x402 PAYMENT MIDDLEWARE — LocalFacilitator
+// Self-hosted, no external dependency
+// ============================================
+const localFacilitator = new LocalFacilitator();
+
+const resourceServer = new x402ResourceServer(localFacilitator)
+  .register(config.network, new ExactEvmScheme())
+  .register("eip155:84532", new ExactEvmScheme()); // Base Sepolia para tests
+
+const paymentConfig = {
+  "GET /api/v1/prices": {
+    accepts: [{
+      scheme: "exact",
+      price: config.pricing.prices,
+      network: config.network,
+      payTo: config.payToAddress,
+      asset: config.usdcAddress,
+    }],
+    description: "Real-time token price data on Base",
+  },
+  "GET /api/v1/prices/batch": {
+    accepts: [{
+      scheme: "exact",
+      price: config.pricing.prices,
+      network: config.network,
+      payTo: config.payToAddress,
+      asset: config.usdcAddress,
+    }],
+    description: "Batch token prices on Base",
+  },
+  "GET /api/v1/trending": {
+    accepts: [{
+      scheme: "exact",
+      price: config.pricing.trending,
+      network: config.network,
+      payTo: config.payToAddress,
+      asset: config.usdcAddress,
+    }],
+    description: "Trending tokens on Base (Clanker + Clawnch)",
+  },
+  "GET /api/v1/whale-alerts": {
+    accepts: [{
+      scheme: "exact",
+      price: config.pricing.whaleAlerts,
+      network: config.network,
+      payTo: config.payToAddress,
+      asset: config.usdcAddress,
+    }],
+    description: "Large on-chain movements (>$50k) on Base",
+  },
+};
+
+app.use(paymentMiddleware(paymentConfig, resourceServer));
+
+// ============================================
+// ROUTES
+// ============================================
+app.use(apiRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found", hint: "Try GET /api/v1/info" });
+});
+
+app.use((err, req, res, _next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
+// ============================================
+// START
+// ============================================
+app.listen(config.port, () => {
+  console.log(`
+╔══════════════════════════════════════════╗
+║          🔮 BASEORACLE v1.0.0           ║
+║    Agent Data Oracle on Base Chain       ║
+╠══════════════════════════════════════════╣
+║  Server:    http://localhost:${config.port}        ║
+║  Network:   Base Mainnet (8453)          ║
+║  Payment:   x402 (USDC)                 ║
+║  Wallet:    ${config.payToAddress?.slice(0,10)}...  ║
+╠══════════════════════════════════════════╣
+║  Free:  /api/v1/info  /health  /metrics  ║
+║  Paid:  /prices $0.001 | /trending $0.002║
+║         /whale-alerts $0.005             ║
+╚══════════════════════════════════════════╝
+  `);
+});
