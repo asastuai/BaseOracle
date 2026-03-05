@@ -16,6 +16,8 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static("public"));
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
@@ -86,7 +88,7 @@ app.use(paymentMiddleware(paymentConfig, resourceServer));
 app.use(apiRoutes);
 
 app.use((req, res) => {
-  res.status(404).json({ error: "Not found", hint: "Try GET /api/v1/info" });
+  res.status(404).json({ error: "Not found", hint: "Try GET /api/v1/info or open /game" });
 });
 
 app.use((err, req, res, _next) => {

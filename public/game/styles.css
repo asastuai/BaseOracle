@@ -1,0 +1,48 @@
+:root {
+  --bg: #0b1120;
+  --panel: #141d33;
+  --accent: #7c9dff;
+  --text: #e6ecff;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1a2850, var(--bg));
+  color: var(--text);
+}
+
+.app-shell { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.grid { display: grid; gap: 12px; }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card {
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 14px;
+}
+.topbar { margin-bottom: 12px; }
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.05); }
+input {
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  background: #0a1328;
+  color: #d7e2ff;
+  border: 1px solid #2a3a66;
+  border-radius: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+pre { white-space: pre-wrap; font-size: 12px; line-height: 1.35; }
+.log-card { margin-top: 12px; }

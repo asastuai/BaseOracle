@@ -37,6 +37,16 @@ export const config = {
     whales: parseInt(process.env.CACHE_TTL_WHALES || "15"),
   },
 
+
+  // Game frontend defaults
+  game: {
+    chainId: parseInt(process.env.GAME_CHAIN_ID || "84532"),
+    chainName: process.env.GAME_CHAIN_NAME || "Base Sepolia",
+    contractAddress: process.env.GAME_CONTRACT_ADDRESS || "",
+    rpcUrl: process.env.GAME_RPC_URL || "https://sepolia.base.org",
+    blockExplorerUrl: process.env.GAME_BLOCK_EXPLORER_URL || "https://sepolia.basescan.org",
+  },
+
   // Pricing per endpoint (USDC)
   pricing: {
     prices: "$0.001",

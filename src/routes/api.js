@@ -27,6 +27,12 @@ router.get("/api/v1/info", (req, res) => {
     token: "$ORACLE",
     endpoints: [
       {
+        path: "/api/v1/game-config",
+        method: "GET",
+        price_usdc: 0,
+        description: "Public config for Web3 game frontend (chain + contract)",
+      },
+      {
         path: "/api/v1/prices",
         method: "GET",
         price_usdc: 0.001,
@@ -80,6 +86,17 @@ router.get("/api/v1/metrics", (req, res) => {
   res.json({
     ...getMetrics(),
     cache: getCacheStats(),
+  });
+});
+
+
+router.get("/api/v1/game-config", (req, res) => {
+  res.json({
+    chainId: config.game.chainId,
+    chainName: config.game.chainName,
+    contractAddress: config.game.contractAddress,
+    rpcUrl: config.game.rpcUrl,
+    blockExplorerUrl: config.game.blockExplorerUrl,
   });
 });
 
