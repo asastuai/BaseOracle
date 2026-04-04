@@ -42,9 +42,13 @@ export const config = {
     prices: "$0.001",
     trending: "$0.002",
     whaleAlerts: "$0.005",
-    sentiment: "$0.003",
-    agentScore: "$0.005",
-    tokenScanner: "$0.005",
+    tokenAnalysis: "$0.005",
+    gas: "$0.001",
+    portfolio: "$0.003",
+    walletProfile: "$0.005",
+    ohlcv: "$0.003",
+    contractVerify: "$0.01",
+    route: "$0.005",
   },
 };
 

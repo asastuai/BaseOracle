@@ -76,6 +76,34 @@ const paymentConfig = {
     }],
     description: "Large on-chain movements (>$50k) on Base",
   },
+  "GET /api/v1/token-analysis": {
+    accepts: [{ scheme: "exact", price: config.pricing.tokenAnalysis, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Full token security audit + price + holder analysis",
+  },
+  "GET /api/v1/gas": {
+    accepts: [{ scheme: "exact", price: config.pricing.gas, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Gas price + cost estimates for common operations",
+  },
+  "GET /api/v1/portfolio": {
+    accepts: [{ scheme: "exact", price: config.pricing.portfolio, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Wallet portfolio: all token balances + USD values",
+  },
+  "GET /api/v1/wallet-profile": {
+    accepts: [{ scheme: "exact", price: config.pricing.walletProfile, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Wallet profiler: trading history, activity type, top tokens",
+  },
+  "GET /api/v1/ohlcv": {
+    accepts: [{ scheme: "exact", price: config.pricing.ohlcv, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Historical OHLCV candle data for any token",
+  },
+  "GET /api/v1/contract-verify": {
+    accepts: [{ scheme: "exact", price: config.pricing.contractVerify, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "Smart contract safety verification: honeypot, rug, tax detection",
+  },
+  "GET /api/v1/route": {
+    accepts: [{ scheme: "exact", price: config.pricing.route, network: config.network, payTo: config.payToAddress, asset: config.usdcAddress }],
+    description: "DEX aggregator: best swap route across all DEXs",
+  },
 };
 
 app.use(paymentMiddleware(paymentConfig, resourceServer));
@@ -99,18 +127,23 @@ app.use((err, req, res, _next) => {
 // ============================================
 app.listen(config.port, () => {
   console.log(`
-╔══════════════════════════════════════════╗
-║          🔮 BASEORACLE v1.0.0           ║
-║    Agent Data Oracle on Base Chain       ║
-╠══════════════════════════════════════════╣
-║  Server:    http://localhost:${config.port}        ║
-║  Network:   Base Mainnet (8453)          ║
-║  Payment:   x402 (USDC)                 ║
-║  Wallet:    ${config.payToAddress?.slice(0,10)}...  ║
-╠══════════════════════════════════════════╣
-║  Free:  /api/v1/info  /health  /metrics  ║
-║  Paid:  /prices $0.001 | /trending $0.002║
-║         /whale-alerts $0.005             ║
-╚══════════════════════════════════════════╝
+╔══════════════════════════════════════════════╗
+║          🔮 BASEORACLE v2.0.0               ║
+║    Agent Infrastructure Platform            ║
+╠══════════════════════════════════════════════╣
+║  Server:    http://localhost:${config.port}            ║
+║  Network:   Base Mainnet (8453)              ║
+║  Payment:   x402 (USDC)                     ║
+║  Wallet:    ${config.payToAddress?.slice(0,10)}...      ║
+╠══════════════════════════════════════════════╣
+║  15 ENDPOINTS:                               ║
+║  Free:  /info /health /metrics /agents       ║
+║  $0.001: /prices /gas                        ║
+║  $0.002: /trending                           ║
+║  $0.003: /portfolio /ohlcv                   ║
+║  $0.005: /whale-alerts /token-analysis       ║
+║          /wallet-profile /route              ║
+║  $0.010: /contract-verify                    ║
+╚══════════════════════════════════════════════╝
   `);
 });
