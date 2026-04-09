@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EmpireChain — Web3 Strategy</title>
+    <link rel="stylesheet" href="/game/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar card">
+        <div>
+          <h1>⚔️ EmpireChain</h1>
+          <p>Frontend jugable con wallet, red sugerida y acciones on-chain.</p>
+        </div>
+        <div class="actions">
+          <button id="connectBtn">Conectar Wallet</button>
+          <button id="switchChainBtn">Cambiar a Base Sepolia</button>
+        </div>
+        <small id="walletState">Sin conectar</small>
+      </header>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Configuración</h2>
+          <label>Dirección del contrato
+            <input id="contractAddress" placeholder="0x..." />
+          </label>
+          <div class="actions">
+            <button id="saveContractBtn">Guardar</button>
+            <button id="loadConfigBtn">Cargar config API</button>
+            <button id="openExplorerBtn">Ver en explorer</button>
+          </div>
+          <pre id="networkView">Sin datos</pre>
+        </article>
+
+        <article class="card">
+          <h2>Mi aldea</h2>
+          <div class="actions">
+            <button id="createVillageBtn">Crear aldea</button>
+            <button id="claimBtn">Claim recursos</button>
+            <button id="refreshBtn">Refrescar estado</button>
+          </div>
+          <pre id="villageView">Sin datos</pre>
+        </article>
+      </section>
+
+      <section class="grid three">
+        <article class="card">
+          <h2>Entrenar tropas</h2>
+          <label>Warriors <input id="warriorsInput" type="number" min="0" value="10" /></label>
+          <label>Defenders <input id="defendersInput" type="number" min="0" value="5" /></label>
+          <div class="actions">
+            <button id="queueBtn">Queue training</button>
+            <button id="finalizeBtn">Finalizar training</button>
+          </div>
+          <pre id="trainingView">Sin cola activa</pre>
+        </article>
+
+        <article class="card">
+          <h2>Atacar</h2>
+          <label>Target wallet
+            <input id="targetInput" placeholder="0x..." />
+          </label>
+          <label>Warriors enviados <input id="attackWarriors" type="number" min="0" value="5" /></label>
+          <label>Defenders enviados <input id="attackDefenders" type="number" min="0" value="2" /></label>
+          <button id="attackBtn">Lanzar ataque</button>
+        </article>
+
+        <article class="card">
+          <h2>Scout target</h2>
+          <label>Wallet a inspeccionar
+            <input id="inspectTargetInput" placeholder="0x..." />
+          </label>
+          <button id="inspectBtn">Consultar aldea target</button>
+          <pre id="targetVillageView">Sin datos</pre>
+        </article>
+      </section>
+
+      <section class="card log-card">
+        <h2>Log</h2>
+        <pre id="logView"></pre>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+    <script src="/game/app.js"></script>
+  </body>
+</html>

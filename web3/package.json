@@ -1,0 +1,16 @@
+{
+  "name": "empirechain-web3",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web3 strategy game starter inspired by classic browser strategy loops.",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:base-sepolia": "hardhat run scripts/deploy.cjs --network baseSepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.17"
+  }
+}

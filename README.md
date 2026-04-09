@@ -35,6 +35,7 @@ AI Agents â†’ HTTP GET + x402 payment â†’ BaseOracle API â†’ Data
 | Endpoint | Price | Description |
 |----------|-------|-------------|
 | `GET /api/v1/info` | Free | Service discovery |
+| `GET /api/v1/game-config` | Free | Frontend chain + contract config |
 | `GET /api/v1/health` | Free | Health check |
 | `GET /api/v1/metrics` | Free | Usage dashboard |
 | `GET /api/v1/prices?token=X` | $0.001 | Token price data |
@@ -85,3 +86,22 @@ npm publish  # or npx baseoracle-mcp-server
 ## License
 
 MIT
+
+## Web3 strategy game starter
+
+If you want to build an original browser-strategy Web3 game (inspired by classic loops), check `docs/travian-web3-blueprint.md` and the ready-to-deploy Hardhat project in `web3/`.
+
+## Frontend demo y hosting
+
+Se agregó un frontend Web3 jugable en `/game` (archivos en `public/game/`) con conexión wallet, cambio de red y acciones del contrato. Guía de deploy en `docs/frontend-hosting.md`. Para arte original, revisa `docs/openai-assets-prompts.md` y ejecuta `npm run generate-assets`.
+
+
+### Game frontend env vars
+
+Set these to preconfigure `/game` on deploy:
+
+- `GAME_CHAIN_ID` (default `84532`)
+- `GAME_CHAIN_NAME` (default `Base Sepolia`)
+- `GAME_CONTRACT_ADDRESS`
+- `GAME_RPC_URL`
+- `GAME_BLOCK_EXPLORER_URL`
