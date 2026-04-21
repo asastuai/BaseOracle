@@ -1,10 +1,34 @@
-﻿# ðŸ”® BaseOracle
+<div align="center">
 
-**Agent Data Oracle â€” pay-per-query data feeds for AI agents on Base.**
+# 🔮 BaseOracle
 
-BaseOracle is the Bloomberg Terminal for autonomous AI agents. It provides real-time market data (prices, trending tokens, whale alerts) that agents pay for automatically via x402 micropayments in USDC.
+### Pay-per-query market data for autonomous AI agents on Base
 
-## Quick Start
+[![Base L2](https://img.shields.io/badge/Base-L2-0052FF.svg)](https://base.org)
+[![x402](https://img.shields.io/badge/payments-x402-brightgreen.svg)](https://www.x402.org/)
+[![Node](https://img.shields.io/badge/Node.js-20%2B-339933.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Related](https://img.shields.io/badge/PayClaw-agent%20wallet%20SDK-blueviolet.svg)](https://github.com/asastuai/payclaw)
+
+The Bloomberg Terminal for autonomous AI agents — real-time prices, trending tokens, whale alerts. Agents pay per query in USDC via the x402 micropayment protocol, no accounts, no subscriptions.
+
+</div>
+
+---
+
+## What it is
+
+BaseOracle is market data infrastructure **designed for machine consumers**, not humans. AI agents that need pricing, trend, or whale-movement data make HTTP requests just like they would against any REST API — except every monetized endpoint expects a x402-formatted USDC payment in the request itself. No API key to manage. No subscription to renew. The agent pays, the data is returned, the USDC lands in the operator's wallet.
+
+Part of a small stack of agent-native primitives:
+
+- [**BaseOracle**](https://github.com/asastuai/BaseOracle) — *(this repo)* — data layer for agents
+- [**PayClaw**](https://github.com/asastuai/payclaw) — agent wallet SDK with programmable rules
+- [**TrustLayer**](https://github.com/asastuai/TrustLayer) — reputation scoring for autonomous agents
+
+---
+
+## Quick start
 
 ```bash
 # 1. Clone
@@ -22,13 +46,19 @@ cp .env.example .env
 npm start
 ```
 
+---
+
 ## Architecture
 
 ```
-AI Agents â†’ HTTP GET + x402 payment â†’ BaseOracle API â†’ Data Sources
-                                          â†“
-                                    USDC â†’ Your Wallet
+AI Agents  →  HTTP GET + x402 payment  →  BaseOracle API  →  Data sources
+                                                ↓
+                                         USDC → operator wallet
 ```
+
+Every monetized endpoint returns `402 Payment Required` on the first request, with a payment challenge in the response header. The agent signs a USDC transfer authorization, retries with the payment attached, and receives the data in the second response. See [x402.org](https://www.x402.org/) for protocol details.
+
+---
 
 ## Endpoints
 
@@ -42,7 +72,32 @@ AI Agents â†’ HTTP GET + x402 payment â†’ BaseOracle API â†’ Data
 | `GET /api/v1/trending` | $0.002 | Trending tokens |
 | `GET /api/v1/whale-alerts` | $0.005 | Whale movements |
 
-## Deploy Token
+---
+
+## Stack
+
+| Layer | Tech |
+|-------|------|
+| Runtime | Node.js 20+ |
+| Framework | Express.js |
+| Payments | x402 protocol (Coinbase CDP facilitator) |
+| Data sources | DexScreener API, BaseScan API |
+| Token | Clanker v4 on Base (Uniswap V4) |
+| Chain | Base (Coinbase L2) |
+
+---
+
+## Deploy
+
+### To Railway
+
+1. Push code to GitHub
+2. Open [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
+3. Add environment variables from `.env.example`
+4. Railway auto-detects Node.js and runs `npm start`
+5. Grab the public URL and update the MCP server + docs
+
+### Token (`$ORACLE` on Clanker v4)
 
 ```bash
 # 1. Upload logo to IPFS (use nft.storage)
@@ -51,37 +106,29 @@ AI Agents â†’ HTTP GET + x402 payment â†’ BaseOracle API â†’ Data
 npm run deploy-token
 ```
 
-## Deploy to Railway
+---
 
-1. Push code to GitHub
-2. Go to [railway.app](https://railway.app)
-3. New Project â†’ Deploy from GitHub repo
-4. Add environment variables from .env.example
-5. Railway auto-detects Node.js and runs `npm start`
-6. Get your public URL â†’ update MCP server and docs
-
-## MCP Server (for OpenClaw agents)
+## MCP server (for OpenClaw agents)
 
 ```bash
 cd mcp-server
-npm publish  # or npx baseoracle-mcp-server
+npm publish              # or: npx baseoracle-mcp-server
 ```
 
-## Revenue Model
+---
 
-- **x402 queries**: USDC goes directly to your wallet per query
-- **LP fees**: Trading fees from $ORACLE on Clanker v4, claim at clanker.world
-- **Buyback**: Use query revenue to buy back $ORACLE, creating flywheel
+## Revenue model
 
-## Stack
+- **x402 queries** — USDC goes directly to operator wallet per query
+- **LP fees** — trading fees from `$ORACLE` on Clanker v4, claim at [clanker.world](https://clanker.world)
+- **Buyback flywheel** — query revenue buys back `$ORACLE`, tightening the supply loop
 
-- **Runtime**: Node.js 20+
-- **Framework**: Express.js
-- **Payments**: x402 protocol (Coinbase CDP facilitator)
-- **Data**: DexScreener API, Basescan API
-- **Token**: Clanker v4 on Base (Uniswap V4)
-- **Chain**: Base (Coinbase L2)
+---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+---
+
+Built by [Juan Cruz Maisu](https://github.com/asastuai) · Buenos Aires, Argentina
