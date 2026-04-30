@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { config } from "./config.js";
@@ -13,8 +14,44 @@ const app = express();
 // MIDDLEWARE
 // ============================================
 app.use(helmet());
-app.use(cors());
+
+// CORS — restrict to known origins in production. Wide-open in dev / when
+// the env var is not set, to keep curl + browser dev tooling working.
+const corsAllowlist = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+if (corsAllowlist.length > 0) {
+  app.use(
+    cors({
+      origin: (origin, cb) => {
+        // Allow same-origin / curl (no Origin header) and explicit allowlist.
+        if (!origin || corsAllowlist.includes(origin)) return cb(null, true);
+        return cb(new Error(`CORS rejected: ${origin}`));
+      },
+    })
+  );
+} else {
+  app.use(cors());
+}
+
 app.use(express.json());
+
+// Rate limiting on free endpoints. Free endpoints share a pool, paid
+// endpoints are gated by x402 payment so they self-rate via $.
+const freeLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 120, // 120 reqs/min/IP on free endpoints
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Free endpoints rate-limited to 120/min/IP." },
+});
+// Apply only to free endpoints. Paid endpoints have x402 as their gate.
+app.use("/api/v1/info", freeLimiter);
+app.use("/api/v1/health", freeLimiter);
+app.use("/api/v1/metrics", freeLimiter);
+app.use("/api/v1/poc/public-key", freeLimiter);
+app.use("/api/v1/agents", freeLimiter);
 
 app.use((req, res, next) => {
   const start = Date.now();
