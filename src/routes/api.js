@@ -12,9 +12,20 @@ import { findBestRoute } from "../data/dex-aggregator.js";
 import { registerAgent, getAgent, listAgents } from "../data/agent-registry.js";
 import { trackQuery, getMetrics } from "../utils/metrics.js";
 import { getCacheStats } from "../utils/cache.js";
+import { attest, getPublicKey } from "../utils/poc.js";
 import { config } from "../config.js";
 
 const router = Router();
+
+/**
+ * Send a JSON response with a PoC `f_i` attestation wrapped around the payload.
+ * Consumers can verify the attestation against the operator's public key to
+ * confirm freshness. See `src/utils/poc.js` for the full primitive.
+ */
+async function sendAttested(res, data, endpoint, freshnessHorizonSeconds) {
+  const attested = await attest(data, { endpoint, freshnessHorizonSeconds });
+  res.json(attested);
+}
 
 // ============================================
 // FREE ENDPOINTS (no x402 payment required)
@@ -173,7 +184,7 @@ router.get("/api/v1/prices", async (req, res) => {
     }
 
     const data = await fetchTokenPrice(token);
-    res.json(data);
+    await sendAttested(res, data, "/api/v1/prices", 30);
   } catch (err) {
     console.error("Error in /prices:", err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -202,11 +213,12 @@ router.get("/api/v1/prices/batch", async (req, res) => {
       .slice(0, 10); // Max 10 per batch
 
     const data = await fetchMultiplePrices(tokenList);
-    res.json({
-      results: data,
-      count: data.length,
-      timestamp: new Date().toISOString(),
-    });
+    await sendAttested(
+      res,
+      { results: data, count: data.length },
+      "/api/v1/prices/batch",
+      30
+    );
   } catch (err) {
     console.error("Error in /prices/batch:", err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -221,7 +233,7 @@ router.get("/api/v1/trending", async (req, res) => {
   try {
     trackQuery("/api/v1/trending");
     const data = await fetchTrending();
-    res.json(data);
+    await sendAttested(res, data, "/api/v1/trending", 60);
   } catch (err) {
     console.error("Error in /trending:", err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -236,7 +248,7 @@ router.get("/api/v1/whale-alerts", async (req, res) => {
   try {
     trackQuery("/api/v1/whale-alerts");
     const data = await fetchWhaleAlerts();
-    res.json(data);
+    await sendAttested(res, data, "/api/v1/whale-alerts", 15);
   } catch (err) {
     console.error("Error in /whale-alerts:", err.message);
     res.status(500).json({ error: "Internal server error" });
@@ -253,7 +265,8 @@ router.get("/api/v1/token-analysis", async (req, res) => {
     trackQuery("/api/v1/token-analysis");
     const { address, chain } = req.query;
     if (!address) return res.status(400).json({ error: "Missing 'address' param", example: "/api/v1/token-analysis?address=0x..." });
-    res.json(await analyzeToken(address, chain || "base"));
+    const data = await analyzeToken(address, chain || "base");
+    await sendAttested(res, data, "/api/v1/token-analysis", 60);
   } catch (err) { console.error("Error in /token-analysis:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -261,7 +274,8 @@ router.get("/api/v1/token-analysis", async (req, res) => {
 router.get("/api/v1/gas", async (req, res) => {
   try {
     trackQuery("/api/v1/gas");
-    res.json(await fetchGasEstimate(req.query.chain || "base"));
+    const data = await fetchGasEstimate(req.query.chain || "base");
+    await sendAttested(res, data, "/api/v1/gas", 30);
   } catch (err) { console.error("Error in /gas:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -271,7 +285,8 @@ router.get("/api/v1/portfolio", async (req, res) => {
     trackQuery("/api/v1/portfolio");
     const { address, chain } = req.query;
     if (!address) return res.status(400).json({ error: "Missing 'address' param" });
-    res.json(await fetchPortfolio(address, chain || "base"));
+    const data = await fetchPortfolio(address, chain || "base");
+    await sendAttested(res, data, "/api/v1/portfolio", 60);
   } catch (err) { console.error("Error in /portfolio:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -281,7 +296,8 @@ router.get("/api/v1/wallet-profile", async (req, res) => {
     trackQuery("/api/v1/wallet-profile");
     const { address, chain } = req.query;
     if (!address) return res.status(400).json({ error: "Missing 'address' param" });
-    res.json(await profileWallet(address, chain || "base"));
+    const data = await profileWallet(address, chain || "base");
+    await sendAttested(res, data, "/api/v1/wallet-profile", 120);
   } catch (err) { console.error("Error in /wallet-profile:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -291,7 +307,8 @@ router.get("/api/v1/ohlcv", async (req, res) => {
     trackQuery("/api/v1/ohlcv");
     const { address, chain, interval, limit } = req.query;
     if (!address) return res.status(400).json({ error: "Missing 'address' param" });
-    res.json(await fetchOHLCV(address, chain || "base", interval || "1h", parseInt(limit || "100")));
+    const data = await fetchOHLCV(address, chain || "base", interval || "1h", parseInt(limit || "100"));
+    await sendAttested(res, data, "/api/v1/ohlcv", 60);
   } catch (err) { console.error("Error in /ohlcv:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -301,7 +318,8 @@ router.get("/api/v1/contract-verify", async (req, res) => {
     trackQuery("/api/v1/contract-verify");
     const { address, chain } = req.query;
     if (!address) return res.status(400).json({ error: "Missing 'address' param" });
-    res.json(await verifyContract(address, chain || "base"));
+    const data = await verifyContract(address, chain || "base");
+    await sendAttested(res, data, "/api/v1/contract-verify", 600);
   } catch (err) { console.error("Error in /contract-verify:", err.message); res.status(500).json({ error: "Internal server error" }); }
 });
 
@@ -311,8 +329,30 @@ router.get("/api/v1/route", async (req, res) => {
     trackQuery("/api/v1/route");
     const { tokenIn, tokenOut, amount, chain } = req.query;
     if (!tokenIn || !tokenOut) return res.status(400).json({ error: "Missing 'tokenIn' and 'tokenOut' params" });
-    res.json(await findBestRoute(tokenIn, tokenOut, amount, chain || "base"));
+    const data = await findBestRoute(tokenIn, tokenOut, amount, chain || "base");
+    await sendAttested(res, data, "/api/v1/route", 30);
   } catch (err) { console.error("Error in /route:", err.message); res.status(500).json({ error: "Internal server error" }); }
+});
+
+// ============================================
+// FREE ENDPOINTS — PoC primitive helpers
+// ============================================
+
+/** GET /api/v1/poc/public-key — return operator public key for attestation verification */
+router.get("/api/v1/poc/public-key", async (req, res) => {
+  trackQuery("/api/v1/poc/public-key");
+  const publicKey = await getPublicKey();
+  res.json({
+    public_key: publicKey,
+    source_id: process.env.POC_SOURCE_ID || "baseoracle:default",
+    primitive: "Proof-of-Context (Aletheia)",
+    spec: "https://github.com/asastuai/proof-of-context",
+    impl: "https://github.com/asastuai/proof-of-context-impl",
+    freshness_types_emitted: ["f_i"],
+    note: publicKey === null
+      ? "POC_SIGNING_KEY env var not set. Attestations will be unsigned (still informational)."
+      : "Attestations are Ed25519-signed. Verify against this public key.",
+  });
 });
 
 // ============================================
