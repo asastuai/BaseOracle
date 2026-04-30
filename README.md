@@ -24,7 +24,7 @@ Every paid response carries a Proof-of-Context attestation typed as input freshn
 
 ---
 
-## How it ties into Proof-of-Context
+## ◊ How it ties into Proof-of-Context
 
 PoC is a verification primitive that binds attestations to a freshness horizon and gates settlement against it. BaseOracle is a producer of `f_i`-typed PoC commitments.
 
@@ -207,7 +207,7 @@ npm run deploy-token
 
 ---
 
-## Part of Aletheia
+## ❖ Part of Aletheia
 
 BaseOracle is the data layer of [Aletheia](https://github.com/asastuai/aletheia). Five sibling repos compose the rest of the stack.
 
