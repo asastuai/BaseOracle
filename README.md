@@ -211,18 +211,18 @@ npm run deploy-token
 
 BaseOracle is the data layer of [Aletheia](https://github.com/asastuai/aletheia). Five sibling repos compose the rest of the stack.
 
-- [**Proof-of-Context**](https://github.com/asastuai/proof-of-context) — verification spine. The primitive that types BaseOracle's response attestations.
-- [**proof-of-context-impl**](https://github.com/asastuai/proof-of-context-impl) — Rust reference implementation of PoC.
-- [**SUR Protocol**](https://github.com/asastuai/sur-protocol) — perp DEX. Consumer of BaseOracle data for agent trading.
-- [**TrustLayer**](https://github.com/asastuai/TrustLayer) — agent reputation. Aggregates PoC commitments from BaseOracle calls.
-- [**PayClaw**](https://github.com/asastuai/payclaw) — agent wallet. Holds the USDC an agent spends on BaseOracle queries.
-- [**Vigil**](https://github.com/asastuai/vigil) — DeFi intelligence. Sibling data layer for risk and MEV signals.
+- [**Proof-of-Context**](https://github.com/asastuai/proof-of-context): verification spine. The primitive that types BaseOracle's response attestations.
+- [**proof-of-context-impl**](https://github.com/asastuai/proof-of-context-impl): Rust reference implementation of PoC.
+- [**SUR Protocol**](https://github.com/asastuai/sur-protocol): perp DEX. Consumer of BaseOracle data for agent trading.
+- [**TrustLayer**](https://github.com/asastuai/TrustLayer): agent reputation. Aggregates PoC commitments from BaseOracle calls.
+- [**PayClaw**](https://github.com/asastuai/payclaw): agent wallet. Holds the USDC an agent spends on BaseOracle queries.
+- [**Vigil**](https://github.com/asastuai/vigil): DeFi intelligence. Sibling data layer for risk and MEV signals.
 
 ---
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. Please see [LICENSE](LICENSE).
 
 ---
 
